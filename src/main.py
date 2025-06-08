@@ -1,6 +1,22 @@
-def main():
-    print("Hello from password-manager!")
+import click
+
+from pathlib import Path
 
 
-if __name__ == "__main__":
-    main()
+def check_valut_existance() -> bool:
+    pass
+
+
+@click.command()
+def add() -> bool:
+    pass
+
+
+@click.command()
+def list() -> None:
+    pass
+
+
+@click.command()
+def delete() -> bool:
+    pass
