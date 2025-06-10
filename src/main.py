@@ -10,7 +10,18 @@ from crypto import Crypto
 from db import DataBaseHandler
 
 
-def initialize_vault():
+@click.group()
+@click.pass_context
+def cli(ctx) -> None:
+    """A command line password manager"""
+    pass
+
+
+@cli.command(
+    "init",
+    help="Initializes the database if it does not exits. Quits silently otherwise",
+)
+def initialize_vault() -> None:
     if not (Path(DB_PATH) / DB_NAME).exists():
         db = DataBaseHandler()
         db.db_init()
@@ -23,20 +34,16 @@ def initialize_vault():
         db.set_key(key)
         click.echo("Master password set successfully. You can now use the vault.")
 
-
-@click.group()
-@click.pass_context
-def cli(ctx) -> None:
-    """A command line password manager"""
-    pass
+    return
 
 
-@cli.command(help="Add an entry to the databse")
+@cli.command(help="Add an entry to the database")
 @click.argument("service_name", type=str)
 @click.argument("website", type=str)
 @click.argument("username", type=str)
 @click.argument("password", type=str)
-def add(service_name: str, website: str, username: str, password: str) -> None:
+@click.pass_context
+def add(ctx, service_name: str, website: str, username: str, password: str) -> None:
     """Add an entry to the database.
 
     Args:
@@ -45,7 +52,7 @@ def add(service_name: str, website: str, username: str, password: str) -> None:
         username (str): username used in the website
         password (str): password used in the website
     """
-    initialize_vault()
+    ctx.invoke(initialize_vault)
     master_password = prompt_master_password()
     cryp = Crypto()
     if not cryp.verify_master_password_from_key(master_password):
@@ -68,7 +75,7 @@ def add(service_name: str, website: str, username: str, password: str) -> None:
 
 
 @cli.command(help="Remove a password based on index")
-@click.argument("index", type=int)
+@click.argument("id", type=int)
 def remove(id: int) -> None:
     if not (Path(DB_PATH) / DB_NAME).exists():
         click.secho(
@@ -88,7 +95,7 @@ def remove(id: int) -> None:
         try:
             db.remove_entry(id)
             click.secho("Entry removed successfully.", fg="yellow")
-        except Exception as e:
+        except Exception:
             click.secho("ID not found!! Nothing to delete.", fg="red")
         return
 
@@ -98,7 +105,7 @@ def remove(id: int) -> None:
 @cli.command()
 @click.option("--length", "-l", default=25, help="Length of the password to generate.")
 def generate(length: int) -> str:
-    """Generates a psudo random password of specified length and prints it to stdout."""
+    """Generates a pseudo random password of specified length and prints it to stdout."""
     alphabets = string.ascii_letters + string.digits + string.punctuation
 
     password = "".join(secrets.choice(alphabets) for _ in range(length))
