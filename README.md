@@ -42,3 +42,22 @@ Open `src/config.py` and alter as needed.
 
 - `DB_NAME`: is the vault name that will be used
 - `DB_PATH`: is the place where the vault should be placed.
+
+## 🆘 Basic HelpBasic Help
+
+```bash
+Usage: main.py [OPTIONS] COMMAND [ARGS]...
+
+  A command line password manager
+
+Options:
+  --help  Show this message and exit.
+
+Commands:
+  add       Add an entry to the database
+  generate  Generates a pseudo random password of specified length and...
+  init      Initializes the database if it does not exits.
+  list      List all the entries without username and password.
+  remove    Remove a password based on index
+  view      View an individual entry based on index
+```
