@@ -126,7 +126,7 @@ def list() -> None:
     return
 
 
-@cli.command(help="View an individual entry")
+@cli.command(help="View an individual entry based on index")
 @click.argument("id", type=int)
 def view(id: int) -> None:
     crypt, master_password = prompt_and_verify_master_password()
@@ -135,7 +135,7 @@ def view(id: int) -> None:
         data = db.get_entry(id)
     except ValueError:
         click.secho(
-            "The given ID does not exist. Try again or use the list / search option.",
+            "The given ID does not exist. Try again or use the list option.",
             fg="red",
         )
         return
