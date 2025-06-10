@@ -67,6 +67,34 @@ def add(service_name: str, website: str, username: str, password: str) -> None:
     click.secho("Password saved successfully.", fg="green")
 
 
+@cli.command(help="Remove a password based on index")
+@click.argument("index", type=int)
+def remove(id: int) -> None:
+    if not (Path(DB_PATH) / DB_NAME).exists():
+        click.secho(
+            "There is no database to delete any entries. Create a database first.",
+            fg="red",
+        )
+        return
+
+    confirmation = (
+        input(f"Are you sure you want to delete the entry number {id} [y/N]: ")
+        .strip()
+        .lower()
+    )
+
+    if confirmation == "y":
+        db = DataBaseHandler()
+        try:
+            db.remove_entry(id)
+            click.secho("Entry removed successfully.", fg="yellow")
+        except Exception as e:
+            click.secho("ID not found!! Nothing to delete.", fg="red")
+        return
+
+    click.echo("Entry was not removed.")
+
+
 @cli.command()
 @click.option("--length", "-l", default=25, help="Length of the password to generate.")
 def generate(length: int) -> str:

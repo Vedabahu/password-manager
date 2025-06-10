@@ -90,3 +90,8 @@ class DataBaseHandler:
                 (service_name, website, username, password),
             )
             conn.commit()
+
+    def remove_entry(self, id: int) -> None:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute("""DELETE FROM vault WHERE id = ?""", (id,))
