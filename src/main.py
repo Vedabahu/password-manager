@@ -2,9 +2,18 @@ import click
 import secrets
 import string
 
+from pathlib import Path
+
+from db import DataBaseHandler
+from config import DB_NAME, DB_PATH
+
 
 def main() -> None:
     """Wrapper function for the CLI entry point."""
+    if not (Path(DB_PATH) / DB_NAME).exists():
+        db = DataBaseHandler()
+        db.db_init()
+
     generate()
 
 
