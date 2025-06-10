@@ -1,11 +1,13 @@
-import click
 import secrets
 import string
-
 from pathlib import Path
+import getpass
 
-from db import DataBaseHandler
+import click
+
 from config import DB_NAME, DB_PATH
+from db import DataBaseHandler
+from crypto import Crypto
 
 
 def main() -> None:
@@ -13,6 +15,14 @@ def main() -> None:
     if not (Path(DB_PATH) / DB_NAME).exists():
         db = DataBaseHandler()
         db.db_init()
+        click.echo(
+            "Database initialized successfully. You can now set a master password."
+        )
+        crypt = Crypto(verification=False)
+        master_password = getpass.getpass("Enter your master password: ")
+        key = crypt.generate_verification_key_from_master_password(master_password)
+        db.set_key(key)
+        click.echo("Master password set successfully. You can now use the vault.")
 
     generate()
 
