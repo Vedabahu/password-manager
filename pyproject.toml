@@ -4,7 +4,4 @@ version = "0.1.0"
 description = "A beginner-friendly password manager built with Python. This project demonstrates basic concepts like encryption, file handling, database management, and user input for securely managing passwords on the command line."
 readme = "README.md"
 requires-python = ">=3.13"
-dependencies = [
-    "click>=8.2.1",
-    "cryptography>=45.0.3",
-]
+dependencies = ["click>=8.2.1", "cryptography>=45.0.3"]
