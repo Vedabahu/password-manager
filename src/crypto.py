@@ -86,3 +86,30 @@ class Crypto:
         encrypted_password = f.encrypt(password.encode())
 
         return (encrypted_username, encrypted_password)
+
+    def decrypt_username_password(
+        self, encrypted_username: bytes, encrypted_password: bytes, master_password: str
+    ) -> tuple[str, str]:
+        """Decrypts the encrypted username and encrypted password using Fernet symmetric encryption.
+
+        Args:
+            encrypted_username (bytes): The username to encrypt.
+            encrypted_password (bytes): The password to encrypt.
+
+        Returns:
+            tuple[str, str]: The decrypted username and password.
+        """
+        kdf = Argon2id(
+            salt=self.__salt,
+            length=32,
+            iterations=5,
+            lanes=4,
+            memory_cost=8 * 4 * 1024,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(master_password.encode()))
+
+        f = Fernet(key)
+        username = f.decrypt(encrypted_username).decode()
+        password = f.decrypt(encrypted_password).decode()
+
+        return (username, password)

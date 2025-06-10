@@ -101,3 +101,14 @@ class DataBaseHandler:
             cursor = conn.cursor()
             res = cursor.execute("""SELECT id, service_name, website FROM vault""")
             return res.fetchall()
+
+    def get_entry(self, id: int) -> tuple[int, str, str, bytes, bytes]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            res = cursor.execute(
+                """SELECT * FROM vault WHERE id = ?""", (id,)
+            ).fetchone()
+            if res:
+                return res
+            else:
+                raise ValueError("ID not found.")

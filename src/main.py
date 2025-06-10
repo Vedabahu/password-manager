@@ -10,6 +10,7 @@ from crypto import Crypto
 from db import DataBaseHandler
 from tabulate import tabulate
 
+
 @click.group()
 @click.pass_context
 def cli(ctx) -> None:
@@ -53,11 +54,7 @@ def add(ctx, service_name: str, website: str, username: str, password: str) -> N
         password (str): password used in the website
     """
     ctx.invoke(initialize_vault)
-    master_password = prompt_master_password()
-    cryp = Crypto()
-    if not cryp.verify_master_password_from_key(master_password):
-        click.secho("Invalid master password. Please try again.", fg="red")
-        exit(1)
+    cryp, master_password = prompt_and_verify_master_password()
 
     encrypted_username, encrypted_password = cryp.encrypt_username_password(
         username, password, master_password
@@ -84,6 +81,8 @@ def remove(id: int) -> None:
         )
         return
 
+    _, _ = prompt_and_verify_master_password()
+
     confirmation = (
         input(f"Are you sure you want to delete the entry number {id} [y/N]: ")
         .strip()
@@ -102,7 +101,9 @@ def remove(id: int) -> None:
     click.echo("Entry was not removed.")
 
 
-@cli.command(help="List all the entries without username and password.")
+@cli.command(
+    help="List all the entries without username and password. To view username and password, use the *view* command."
+)
 def list() -> None:
     if not (Path(DB_PATH) / DB_NAME).exists():
         click.secho(
@@ -110,12 +111,8 @@ def list() -> None:
             fg="red",
         )
         return
-    
-    master_password = prompt_master_password()
-    cryp = Crypto()
-    if not cryp.verify_master_password_from_key(master_password):
-        click.secho("Invalid master password. Please try again.", fg="red")
-        exit(1)
+
+    _, _ = prompt_and_verify_master_password()
 
     db = DataBaseHandler()
     data = db.list_all()
@@ -128,6 +125,30 @@ def list() -> None:
     )
     return
 
+
+@cli.command(help="View an individual entry")
+@click.argument("id", type=int)
+def view(id: int) -> None:
+    crypt, master_password = prompt_and_verify_master_password()
+    db = DataBaseHandler()
+    try:
+        data = db.get_entry(id)
+    except ValueError:
+        click.secho(
+            "The given ID does not exist. Try again or use the list / search option.",
+            fg="red",
+        )
+        return
+
+    username, password = crypt.decrypt_username_password(
+        data[3], data[4], master_password
+    )
+
+    click.echo(
+        f"ID: {data[0]}\nService Name: {data[1]}\nWebsite: {data[2]}\nUsername: {username}\nPassword: {password}"
+    )
+
+
 @cli.command()
 @click.option("--length", "-l", default=25, help="Length of the password to generate.")
 def generate(length: int) -> str:
@@ -137,6 +158,15 @@ def generate(length: int) -> str:
     password = "".join(secrets.choice(alphabets) for _ in range(length))
     click.echo(password)
     return password
+
+
+def prompt_and_verify_master_password() -> tuple[Crypto, str]:
+    master_password = prompt_master_password()
+    cryp = Crypto()
+    if not cryp.verify_master_password_from_key(master_password):
+        click.secho("Invalid master password. Please try again.", fg="red")
+        exit(1)
+    return cryp, master_password
 
 
 def prompt_master_password() -> str:
