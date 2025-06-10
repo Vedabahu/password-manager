@@ -11,11 +11,12 @@ A beginner-friendly password manager built with Python. This project demonstrate
 - View saved credentials
 - Delete entries
 - Encrypt and decrypt password storage
+- Generate random passwords
 - Command-line interface
 
 ## 🔐 Security
 
-- Passwords are stored in an encrypted format using basic symmetric encryption (e.g., Fernet from `cryptography` library).
+- Usernames and Passwords are stored in an encrypted format using basic symmetric encryption (e.g., Fernet from `cryptography` library with key derived using `Argon2id` as the key derivation function).
 - A master password is used to unlock the manager and decrypt data.
 
 > **Note:** This project is designed for learning purposes. It does not follow advanced security best practices such as key derivation functions (KDFs), secure vault storage, or tamper detection.
@@ -25,8 +26,19 @@ A beginner-friendly password manager built with Python. This project demonstrate
 - Python 3.13+
 - [`uv`](https://github.com/astral-sh/uv) package manager
 - `cryptography` library
+- `click` for CLI development
 
-Install dependencies using `uv`:
+## ▶️ Run the password manager
+
+Automatically install dependencies using `uv` and run the file:
 
 ```bash
-uv run main.py
+uv run src/main.py
+```
+
+## ⚙️ Configuration
+
+Open `src/config.py` and alter as needed.
+
+- `DB_NAME`: is the vault name that will be used
+- `DB_PATH`: is the place where the vault should be placed.
