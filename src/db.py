@@ -18,8 +18,9 @@ class DataBaseHandler:
                 """
                 CREATE TABLE IF NOT EXISTS vault (
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
-                    username TEXT NOT NULL,
+                    service_name TEXT NOT NULL,
                     website TEXT NOT NULL,
+                    username TEXT NOT NULL,
                     password TEXT NOT NULL
                 )
                 """
