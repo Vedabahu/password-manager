@@ -1,5 +1,8 @@
+import base64
+
 from cryptography.fernet import Fernet
 from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives.kdf.argon2 import Argon2id
 from cryptography.hazmat.primitives.kdf.pbkdf2 import PBKDF2HMAC
 
 from db import DataBaseHandler
@@ -56,3 +59,30 @@ class Crypto:
             return True
         except Exception:
             return False
+
+    def encrypt_username_password(
+        self, username: str, password: str, master_password: str
+    ) -> tuple[bytes, bytes]:
+        """Encrypts the username and password using Fernet symmetric encryption.
+
+        Args:
+            username (str): The username to encrypt.
+            password (str): The password to encrypt.
+
+        Returns:
+            tuple[bytes, bytes]: The encrypted username and password.
+        """
+        kdf = Argon2id(
+            salt=self.__salt,
+            length=32,
+            iterations=5,
+            lanes=4,
+            memory_cost=8 * 4 * 1024,
+        )
+        key = base64.urlsafe_b64encode(kdf.derive(master_password.encode()))
+
+        f = Fernet(key)
+        encrypted_username = f.encrypt(username.encode())
+        encrypted_password = f.encrypt(password.encode())
+
+        return (encrypted_username, encrypted_password)

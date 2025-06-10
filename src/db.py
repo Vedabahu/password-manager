@@ -1,7 +1,7 @@
-from config import DB_NAME, DB_PATH
+import sqlite3
 from pathlib import Path
 
-import sqlite3
+from config import DB_NAME, DB_PATH
 
 
 class DataBaseHandler:
@@ -20,8 +20,8 @@ class DataBaseHandler:
                     id INTEGER PRIMARY KEY AUTOINCREMENT,
                     service_name TEXT NOT NULL,
                     website TEXT NOT NULL,
-                    username TEXT NOT NULL,
-                    password TEXT NOT NULL
+                    username BLOB NOT NULL,
+                    password BLOB NOT NULL
                 )
                 """
             )
@@ -66,5 +66,27 @@ class DataBaseHandler:
             cursor.execute(
                 "INSERT INTO master_password (password_hash) VALUES (?)",
                 (password_hash,),
+            )
+            conn.commit()
+
+    def add_entry(
+        self, service_name: str, website: str, username: bytes, password: bytes
+    ):
+        """Adds vault entry to database
+
+        Args:
+            service_name (str): Name of the service
+            website (str): Website URI
+            username (bytes): encrypted username
+            password (bytes): encrypted password
+        """
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            cursor.execute(
+                """
+                INSERT INTO vault (service_name, website, username, password)
+                VALUES (?, ?, ?, ?)
+                """,
+                (service_name, website, username, password),
             )
             conn.commit()

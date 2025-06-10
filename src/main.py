@@ -1,17 +1,16 @@
+import getpass
 import secrets
 import string
 from pathlib import Path
-import getpass
 
 import click
 
 from config import DB_NAME, DB_PATH
-from db import DataBaseHandler
 from crypto import Crypto
+from db import DataBaseHandler
 
 
-def main() -> None:
-    """Wrapper function for the CLI entry point."""
+def initialize_vault():
     if not (Path(DB_PATH) / DB_NAME).exists():
         db = DataBaseHandler()
         db.db_init()
@@ -19,25 +18,57 @@ def main() -> None:
             "Database initialized successfully. You can now set a master password."
         )
         crypt = Crypto(verification=False)
-        master_password = getpass.getpass("Enter your master password: ")
+        master_password = prompt_master_password()
         key = crypt.generate_verification_key_from_master_password(master_password)
         db.set_key(key)
         click.echo("Master password set successfully. You can now use the vault.")
 
-    generate()
+
+@click.group()
+@click.pass_context
+def cli(ctx) -> None:
+    """A command line password manager"""
+    pass
 
 
-@click.command()
-@click.option("--length", "-l", default=25, help="Length of the password to generate.")
-def generate(length: int) -> str:
-    """Generates a psudo random password of specified length and prints it to stdout.
+@cli.command(help="Add an entry to the databse")
+@click.argument("service_name", type=str)
+@click.argument("website", type=str)
+@click.argument("username", type=str)
+@click.argument("password", type=str)
+def add(service_name: str, website: str, username: str, password: str) -> None:
+    """Add an entry to the database.
 
     Args:
-        length (int): The expected length of the generated password.
-
-    Returns:
-        str: The password.
+        service_name (str): Name of the service being used
+        website (str): website uri
+        username (str): username used in the website
+        password (str): password used in the website
     """
+    initialize_vault()
+    master_password = prompt_master_password()
+    cryp = Crypto()
+    if not cryp.verify_master_password_from_key(master_password):
+        click.secho("Invalid master password. Please try again.", fg="red")
+        exit(1)
+
+    encrypted_username, encrypted_password = cryp.encrypt_username_password(
+        username, password, master_password
+    )
+
+    db = DataBaseHandler()
+    db.add_entry(
+        service_name=service_name,
+        website=website,
+        username=encrypted_username,
+        password=encrypted_password,
+    )
+
+
+@cli.command()
+@click.option("--length", "-l", default=25, help="Length of the password to generate.")
+def generate(length: int) -> str:
+    """Generates a psudo random password of specified length and prints it to stdout."""
     alphabets = string.ascii_letters + string.digits + string.punctuation
 
     password = "".join(secrets.choice(alphabets) for _ in range(length))
@@ -45,5 +76,14 @@ def generate(length: int) -> str:
     return password
 
 
+def prompt_master_password() -> str:
+    """Prompts the user for a master password.
+
+    Returns:
+        str: The master password entered by the user.
+    """
+    return getpass.getpass("Enter your master password: ")
+
+
 if __name__ == "__main__":
-    main()
+    cli()
