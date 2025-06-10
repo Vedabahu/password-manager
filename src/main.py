@@ -8,7 +8,7 @@ import click
 from config import DB_NAME, DB_PATH
 from crypto import Crypto
 from db import DataBaseHandler
-
+from tabulate import tabulate
 
 @click.group()
 @click.pass_context
@@ -101,6 +101,32 @@ def remove(id: int) -> None:
 
     click.echo("Entry was not removed.")
 
+
+@cli.command(help="List all the entries without username and password.")
+def list() -> None:
+    if not (Path(DB_PATH) / DB_NAME).exists():
+        click.secho(
+            "There is no database to delete any entries. Create a database first.",
+            fg="red",
+        )
+        return
+    
+    master_password = prompt_master_password()
+    cryp = Crypto()
+    if not cryp.verify_master_password_from_key(master_password):
+        click.secho("Invalid master password. Please try again.", fg="red")
+        exit(1)
+
+    db = DataBaseHandler()
+    data = db.list_all()
+    click.echo(
+        tabulate(
+            data,
+            headers=["ID", "Service Name", "Website"],
+            tablefmt="pretty",
+        )
+    )
+    return
 
 @cli.command()
 @click.option("--length", "-l", default=25, help="Length of the password to generate.")

@@ -95,3 +95,9 @@ class DataBaseHandler:
         with sqlite3.connect(self.db_path) as conn:
             cursor = conn.cursor()
             cursor.execute("""DELETE FROM vault WHERE id = ?""", (id,))
+
+    def list_all(self) -> list[tuple[int, str, str]]:
+        with sqlite3.connect(self.db_path) as conn:
+            cursor = conn.cursor()
+            res = cursor.execute("""SELECT id, service_name, website FROM vault""")
+            return res.fetchall()
