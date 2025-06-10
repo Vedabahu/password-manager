@@ -64,6 +64,8 @@ def add(service_name: str, website: str, username: str, password: str) -> None:
         password=encrypted_password,
     )
 
+    click.secho("Password saved successfully.", fg="green")
+
 
 @cli.command()
 @click.option("--length", "-l", default=25, help="Length of the password to generate.")
