@@ -1,6 +1,6 @@
 # 🛡️ Simple Password Manager (Python Project)
 
-A beginner-friendly password manager built with Python. This project demonstrates basic concepts like encryption, file handling, database management, and user input for securely managing passwords on the command line. Jump to the [demo](#demo)
+A beginner-friendly password manager built with Python. This project demonstrates basic concepts like encryption, file handling, database management, and user input for securely managing passwords on the command line. Jump to the [demo](#-demo)
 
 > ⚠️ **DISCLAIMER**:  
 > This password manager is a simple educational project and **not** intended for production or real-world use. If you need a secure, production-ready password manager, consider using trusted solutions like [KeePassXC](https://keepassxc.org/) or [Bitwarden](https://bitwarden.com/).
